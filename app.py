@@ -61,9 +61,11 @@ if uploaded_file is not None:
             if str(y) not in yearly_data:
                 yearly_data[str(y)] = {"total_year": 0.0, "total_cumulative": 0.0}
 
-        rows_main = [("Рік", "Сума за рік", "Після вирахування 7 %")]
-        rows_7percent = [("Рік", "7% від суми")]
-        rows_cumulative = [("Рік", "Кумулятивна сума")]
+        rows_full = [(
+            "A. Рік", "B. Сума за рік", "C. Після вирахування 7%",
+            "D. Рік", "E. 7% від суми", "F. Кумулятивна сума",
+            "G. Рік", "H. Як проводився розрахунок", "I. Результат"
+        )]
 
         total_all = 0.0
         accumulated = 0.0
@@ -76,32 +78,45 @@ if uploaded_file is not None:
             if year_int == current_year:
                 percent_7 = 0.0
                 after = accumulated
+                calc_str = f"Без змін (поточний рік)"
             elif total_year == 0:
                 percent_7 = round(accumulated * 0.07, 2)
+                calc_str = f"{accumulated} * 7% = {percent_7}"
                 accumulated = round(accumulated * 0.93, 2)
                 after = accumulated
             else:
                 combined = accumulated + total_year
                 percent_7 = round(combined * 0.07, 2)
+                calc_str = f"({accumulated} + {total_year}) * 7% = {percent_7}"
                 accumulated = round(combined * 0.93, 2)
                 after = accumulated
 
             cumulative_sum = round(accumulated + percent_7, 2) if year_int != current_year else ""
 
-            rows_main.append((year, round(total_year, 2), after))
-            rows_7percent.append((year, percent_7))
-            rows_cumulative.append((year, cumulative_sum))
+            rows_full.append((
+                year, round(total_year, 2), after,
+                year, percent_7, cumulative_sum,
+                year, calc_str, after
+            ))
 
-        rows_main.append(("Усього", round(total_all, 2), round(after, 2)))
+        rows_full.append((
+            "Усього", round(total_all, 2), round(after, 2),
+            "", "", "",
+            "", "", ""
+        ))
 
-        st.success("✅ Дані оброблено:")
-        st.table(rows_main)
+        st.success("✅ Дані оброблено")
 
-        with st.expander("📉 Показати 7% від суми"):
-            st.table(rows_7percent)
+        # Основна таблиця A–C
+        st.table([row[:3] for row in rows_full])
 
-        with st.expander("📊 Показати кумулятивну суму по роках"):
-            st.table(rows_cumulative)
+        # Спойлер D–F
+        with st.expander("📉 Показати 7% від суми та кумулятивну суму"):
+            st.table([row[3:6] for row in rows_full])
 
-        st.write(f"Загальна сума за всі роки: **{round(total_all, 2)} грн**")
-        st.write(f"Сума після вирахування 7% (за всі роки, крім поточного): **{round(after, 2)} грн**")
+        # Спойлер G–I
+        with st.expander("🧮 Як проводився розрахунок"):
+            st.table([row[6:] for row in rows_full])
+
+        st.write(f"**Загальна сума за всі роки:** {round(total_all, 2)} грн")
+        st.write(f"**Сума після вирахування 7% (крім поточного року):** {round(after, 2)} грн")
