@@ -61,7 +61,7 @@ if uploaded_file is not None:
             if str(y) not in yearly_data:
                 yearly_data[str(y)] = {"total_year": 0.0, "total_cumulative": 0.0}
 
-        rows_main = [("Рік", "Сума за рік", "Після вирахування")]
+        rows_main = [("Рік", "Сума за рік", "Після вирахування 7 %")]
         rows_7percent = [("Рік", "7% від суми")]
         rows_cumulative = [("Рік", "Кумулятивна сума")]
 
